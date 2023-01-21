@@ -1,6 +1,7 @@
 package main
 
 import (
+	"github.com/alvinscheibe/go-fiber-api/database"
 	"github.com/gofiber/fiber/v2"
 	"log"
 )
@@ -10,6 +11,7 @@ func welcome(c *fiber.Ctx) error {
 }
 
 func main() {
+	database.ConnectDb()
 	app := fiber.New()
 
 	app.Get("/api", welcome)
