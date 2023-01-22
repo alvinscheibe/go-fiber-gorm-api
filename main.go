@@ -13,7 +13,8 @@ func welcome(c *fiber.Ctx) error {
 
 func setupRoutes(app *fiber.App) {
 	app.Get("/api", welcome)
-	
+
+	app.Get("/api/users", routes.GetUsers)
 	app.Post("/api/users", routes.CreateUser)
 }
 
@@ -21,7 +22,7 @@ func main() {
 	database.ConnectDb()
 	app := fiber.New()
 
-	app.Get("/api", welcome)
+	setupRoutes(app)
 
 	log.Fatal(app.Listen(":3000"))
 }

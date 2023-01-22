@@ -33,3 +33,17 @@ func CreateUser(context *fiber.Ctx) error {
 
 	return context.Status(200).JSON(responseUser)
 }
+
+func GetUsers(context *fiber.Ctx) error {
+	users := []models.User{}
+
+	database.Database.Db.Find(&users)
+
+	responseUsers := []User{}
+	for _, user := range users {
+		responseUser := CreateResponseUser(user)
+		responseUsers = append(responseUsers, responseUser)
+	}
+
+	return context.Status(200).JSON(responseUsers)
+}
