@@ -1,6 +1,7 @@
 package routes
 
 import (
+	"errors"
 	"github.com/alvinscheibe/go-fiber-api/database"
 	"github.com/alvinscheibe/go-fiber-api/models"
 	"github.com/gofiber/fiber/v2"
@@ -46,4 +47,32 @@ func GetUsers(context *fiber.Ctx) error {
 	}
 
 	return context.Status(200).JSON(responseUsers)
+}
+
+func GetUser(context *fiber.Ctx) error {
+	id, err := context.ParamsInt("id")
+
+	var user models.User
+
+	if err != nil {
+		return context.Status(400).JSON("Please ensure that :id is an integer")
+	}
+
+	if err := findUser(id, &user); err != nil {
+		return context.Status(400).JSON(err.Error())
+	}
+
+	responseUser := CreateResponseUser(user)
+	
+	return context.Status(200).JSON(responseUser)
+}
+
+func findUser(id int, user *models.User) error {
+	database.Database.Db.Find(&user, "id = ?", id)
+
+	if user.ID == 0 {
+		return errors.New("User doesn't exist")
+	}
+
+	return nil
 }
