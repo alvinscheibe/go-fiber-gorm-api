@@ -101,6 +101,26 @@ func UpdateUser(context *fiber.Ctx) error {
 	return context.Status(200).JSON(responseUser)
 }
 
+func DeleteUser(context *fiber.Ctx) error {
+	id, err := context.ParamsInt("id")
+
+	var user models.User
+
+	if err != nil {
+		return context.Status(400).JSON("Please ensure that :id is an integer")
+	}
+
+	if err := findUser(id, &user); err != nil {
+		return context.Status(400).JSON(err.Error())
+	}
+
+	if err := database.Database.Db.Delete(&user).Error; err != nil {
+		return context.Status(404).JSON(err.Error())
+	}
+
+	return context.Status(200).JSON("Successfully deleted user")
+}
+
 func findUser(id int, user *models.User) error {
 	database.Database.Db.Find(&user, "id = ?", id)
 
