@@ -33,3 +33,16 @@ func CreateProduct(context *fiber.Ctx) error {
 
 	return context.Status(200).JSON(responseProduct)
 }
+
+func GetProducts(context *fiber.Ctx) error {
+	products := []models.Product{}
+
+	database.Database.Db.Find(&products)
+
+	responseProducts := []Product{}
+	for _, product := range products {
+		responseProducts = append(responseProducts, CreateResponseProduct(product))
+	}
+
+	return context.Status(200).JSON(responseProducts)
+}
