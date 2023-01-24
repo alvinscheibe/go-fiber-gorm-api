@@ -1,6 +1,10 @@
 package routes
 
-import "github.com/alvinscheibe/go-fiber-api/models"
+import (
+	"github.com/alvinscheibe/go-fiber-api/database"
+	"github.com/alvinscheibe/go-fiber-api/models"
+	"github.com/gofiber/fiber/v2"
+)
 
 type Product struct {
 	ID           uint   `json:"id"`
@@ -14,4 +18,18 @@ func CreateResponseProduct(productModel models.Product) Product {
 		Name:         productModel.Name,
 		SerialNumber: productModel.SerialNumber,
 	}
+}
+
+func CreateProduct(context *fiber.Ctx) error {
+	var product models.Product
+
+	if err := context.BodyParser(&product); err != nil {
+		return context.Status(400).JSON(err.Error())
+	}
+
+	database.Database.Db.Create(&product)
+
+	responseProduct := CreateResponseProduct(product)
+
+	return context.Status(200).JSON(responseProduct)
 }
