@@ -1,6 +1,7 @@
 package routes
 
 import (
+	"errors"
 	"github.com/alvinscheibe/go-fiber-api/database"
 	"github.com/alvinscheibe/go-fiber-api/models"
 	"github.com/gofiber/fiber/v2"
@@ -45,4 +46,32 @@ func GetProducts(context *fiber.Ctx) error {
 	}
 
 	return context.Status(200).JSON(responseProducts)
+}
+
+func GetProduct(context *fiber.Ctx) error {
+	id, err := context.ParamsInt("id")
+
+	var product models.Product
+
+	if err != nil {
+		return context.Status(400).JSON("Please ensure that :id as an integer")
+	}
+
+	if err := findProduct(id, &product); err != nil {
+		return context.Status(400).JSON(err.Error())
+	}
+
+	responseProduct := CreateResponseProduct(product)
+
+	return context.Status(200).JSON(responseProduct)
+}
+
+func findProduct(id int, product *models.Product) error {
+	database.Database.Db.Find(&product, "id = ?", id)
+
+	if product.ID == 0 {
+		return errors.New("Product doesn't exist")
+	}
+
+	return nil
 }
