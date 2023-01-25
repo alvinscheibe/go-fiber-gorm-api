@@ -66,6 +66,40 @@ func GetProduct(context *fiber.Ctx) error {
 	return context.Status(200).JSON(responseProduct)
 }
 
+func UpdateProduct(context *fiber.Ctx) error {
+	id, err := context.ParamsInt("id")
+
+	var product models.Product
+
+	if err != nil {
+		return context.Status(400).JSON("Please ensure that :id as an integer")
+	}
+
+	if err := findProduct(id, &product); err != nil {
+		return context.Status(400).JSON(err.Error())
+	}
+
+	type UpdateProduct struct {
+		Name         string `json:"name"`
+		SerialNumber string `json:"serial_number"`
+	}
+
+	var updateProduct UpdateProduct
+
+	if err := context.BodyParser(updateProduct); err != nil {
+		return context.Status(500).JSON(err.Error())
+	}
+
+	product.Name = updateProduct.Name
+	product.SerialNumber = updateProduct.SerialNumber
+
+	database.Database.Db.Save(&product)
+
+	responseProduct := CreateResponseProduct(product)
+
+	return context.Status(200).JSON(responseProduct)
+}
+
 func findProduct(id int, product *models.Product) error {
 	database.Database.Db.Find(&product, "id = ?", id)
 
