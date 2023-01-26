@@ -50,6 +50,33 @@ func CreateOrder(context *fiber.Ctx) error {
 	return context.Status(200).JSON(responseOrder)
 }
 
+func GetOrders(context *fiber.Ctx) error {
+	orders := []models.Order{}
+	database.Database.Db.Find(&orders)
+	responseOrders := []Order{}
+
+	for _, order := range orders {
+		var user models.User
+		var product models.Product
+
+		if err := findUser(order.UserRefer, &user); err != nil {
+			return context.Status(500).JSON(err.Error())
+		}
+
+		if err := findProduct(order.ProductRefer, &product); err != nil {
+			return context.Status(500).JSON(err.Error())
+		}
+
+		responseUser := CreateResponseUser(user)
+		responseProduct := CreateResponseProduct(product)
+		responseOrder := CreateResponseOrder(order, responseUser, responseProduct)
+
+		responseOrders = append(responseOrders, responseOrder)
+	}
+	
+	return context.Status(200).JSON(responseOrders)
+}
+
 func findOrder(id int, order *models.Order) error {
 	database.Database.Db.Find(&order, "id = ?", id)
 
