@@ -73,8 +73,38 @@ func GetOrders(context *fiber.Ctx) error {
 
 		responseOrders = append(responseOrders, responseOrder)
 	}
-	
+
 	return context.Status(200).JSON(responseOrders)
+}
+
+func GetOrder(context *fiber.Ctx) error {
+	id, err := context.ParamsInt("id")
+
+	var order models.Order
+	var user models.User
+	var product models.Product
+
+	if err != nil {
+		return context.Status(400).JSON("Please ensure that :id is an integer")
+	}
+
+	if err := findOrder(id, &order); err != nil {
+		return context.Status(404).JSON(err.Error())
+	}
+
+	if err := findUser(order.UserRefer, &user); err != nil {
+		return context.Status(500).JSON(err.Error())
+	}
+
+	if err := findProduct(order.ProductRefer, &product); err != nil {
+		return context.Status(500).JSON(err.Error())
+	}
+
+	responseUser := CreateResponseUser(user)
+	responseProduct := CreateResponseProduct(product)
+	responseOrder := CreateResponseOrder(order, responseUser, responseProduct)
+
+	return context.Status(200).JSON(responseOrder)
 }
 
 func findOrder(id int, order *models.Order) error {
