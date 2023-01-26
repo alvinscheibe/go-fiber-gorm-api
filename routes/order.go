@@ -1,6 +1,7 @@
 package routes
 
 import (
+	"errors"
 	"github.com/alvinscheibe/go-fiber-api/database"
 	"github.com/alvinscheibe/go-fiber-api/models"
 	"github.com/gofiber/fiber/v2"
@@ -45,6 +46,16 @@ func CreateOrder(context *fiber.Ctx) error {
 	responseUser := CreateResponseUser(user)
 	responseProduct := CreateResponseProduct(product)
 	responseOrder := CreateResponseOrder(order, responseUser, responseProduct)
-	
+
 	return context.Status(200).JSON(responseOrder)
+}
+
+func findOrder(id int, order *models.Order) error {
+	database.Database.Db.Find(&order, "id = ?", id)
+
+	if order.ID == 0 {
+		return errors.New("Order doesn't exist")
+	}
+
+	return nil
 }
